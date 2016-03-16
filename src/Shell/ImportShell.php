@@ -223,7 +223,6 @@ class ImportShell extends Shell
                 $percentDone = round(($step/$stepCount) * 100);
                 $msg = "Processing inserts: $percentDone%";
                 $this->_io->overwrite($msg, 0);
-                //$msg = $stepMsg.$this->helper('Colorful')->importInsert('Would insert');
             }
             $this->out('');
         }
@@ -236,7 +235,6 @@ class ImportShell extends Shell
                     $percentDone = round(($step/$stepCount) * 100);
                     $msg = "Processing updates: $percentDone%";
                     $this->_io->overwrite($msg, 0);
-                    // $msg = $stepMsg.$this->helper('Colorful')->importOverwrite('Would overwrite');
                 }
                 $this->out('');
             } else {
