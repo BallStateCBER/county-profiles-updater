@@ -78,6 +78,16 @@ class ImportShell extends Shell
         return $percentDone.'%';
     }
 
+    private function abortWithEntityError($errors)
+    {
+        $count = count($errors);
+        $msg = __n('Error', 'Errors', $count).' creating a statistic entity: ';
+        $msg = $this->helper('Colorful')->error($msg);
+        $this->out($msg);
+        $this->out(pr($errors));
+        $this->abort();
+    }
+
     private function menu()
     {
         $msg = "Available imports:\n";
@@ -174,7 +184,12 @@ class ImportShell extends Shell
 
                 // Mark for insertion
                 if ($count == 0) {
-                    $this->toInsert[] = $newRecord;
+                    $statEntity = $statisticsTable->newEntity($newRecord);
+                    $errors = $statEntity->errors();
+                    if (! empty($errors)) {
+                        $this->abortWithEntityError($errors);
+                    }
+                    $this->toInsert[] = $statEntity;
                     continue;
                 }
 
@@ -186,7 +201,13 @@ class ImportShell extends Shell
 
                 // Mark for overwriting
                 $recordId = $results[0]['id'];
-                $this->toOverwrite[$recordId] = $newRecord;
+                $statEntity = $statisticsTable->get($recordId);
+                $statEntity = $statisticsTable->patchEntity($statEntity, $newRecord);
+                $errors = $statEntity->errors();
+                if (! empty($errors)) {
+                    $this->abortWithEntityError($errors);
+                }
+                $this->toOverwrite[] = $statEntity;
             }
         }
         $this->out();
@@ -233,7 +254,7 @@ class ImportShell extends Shell
 
         // Insert
         if (! empty($this->toInsert)) {
-            foreach ($this->toInsert as $i => $record) {
+            foreach ($this->toInsert as $i => $statEntity) {
                 $step++;
                 $percentDone = $this->getProgress($step, $stepCount);
                 $msg = "Importing: $percentDone";
@@ -244,7 +265,7 @@ class ImportShell extends Shell
         // Overwrite
         if (! empty($this->toOverwrite)) {
             if ($this->getOverwrite()) {
-                foreach ($this->toOverwrite as $i => $record) {
+                foreach ($this->toOverwrite as $i => $statEntity) {
                     $step++;
                     $percentDone = $this->getProgress($step, $stepCount);
                     $msg = "Importing: $percentDone";
