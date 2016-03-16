@@ -209,6 +209,11 @@ class ImportShell extends Shell
         }
         $this->out();
 
+        if ($stepCount == 0) {
+            $this->out('Nothing to import');
+            exit();
+        }
+
         $begin = $this->in('Begin import?', ['y', 'n'], 'y');
         if ($begin == 'n') {
             exit();
