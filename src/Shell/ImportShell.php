@@ -189,7 +189,7 @@ class ImportShell extends Shell
                 $this->toOverwrite[$recordId] = $newRecord;
             }
         }
-        $this->out('');
+        $this->out();
 
         $stepCount = 0;
         if ($this->ignoreCount) {
@@ -227,30 +227,31 @@ class ImportShell extends Shell
         }
         $step = 0;
 
+        $percentDone = $this->getProgress($step, $stepCount);
+        $msg = "Importing: $percentDone";
+        $this->out($msg, 0);
+
         // Insert
         if (! empty($this->toInsert)) {
-            $this->out('Processing inserts...', 0);
-            foreach ($this->toInsert as $record) {
+            foreach ($this->toInsert as $i => $record) {
                 $step++;
                 $percentDone = $this->getProgress($step, $stepCount);
-                $msg = "Processing inserts: $percentDone";
+                $msg = "Importing: $percentDone";
                 $this->_io->overwrite($msg, 0);
             }
-            $this->out('');
         }
 
         // Overwrite
         if (! empty($this->toOverwrite)) {
             if ($this->getOverwrite()) {
-                $this->out('Processing updates...', 0);
-                foreach ($this->toOverwrite as $record) {
+                foreach ($this->toOverwrite as $i => $record) {
                     $step++;
                     $percentDone = $this->getProgress($step, $stepCount);
-                    $msg = "Processing updates: $percentDone";
+                    $msg = "Importing: $percentDone";
                     $this->_io->overwrite($msg, 0);
                 }
-                $this->out('');
             } else {
+                $this->out();
                 $msg = $overwriteCount.' updated '.__n('statistic', 'statistics', $overwriteCount).' ignored';
                 $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
                 $this->out($msg);
