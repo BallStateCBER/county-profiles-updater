@@ -169,8 +169,9 @@ class ImportShell extends Shell
                 ];
                 $results = $statisticsTable->find('all')
                     ->select(['id', 'value'])
-                    ->where($conditions);
-                $count = $results->count();
+                    ->where($conditions)
+                    ->toArray();
+                $count = count($results);
                 if ($count > 1) {
                     $msg = "Problem: More than one statistics record found matching ".print_r($conditions, true);
                     $msg = $this->helper('Colorful')->error($msg);
@@ -194,7 +195,8 @@ class ImportShell extends Shell
                 }
 
                 // Increment ignore count
-                if ($results[0]['value']) {
+                $recordedValue = $results[0]['value'];
+                if ($recordedValue == $value) {
                     $this->ignoreCount++;
                     continue;
                 }
@@ -214,9 +216,9 @@ class ImportShell extends Shell
 
         $stepCount = 0;
         if ($this->ignoreCount) {
-            $insertCount = count($this->ignoreCount);
-            $msg = number_format($insertCount).' '.__n('statistic', 'statistics', $insertCount);
-            $msg .= ' have already been recorded and will be '.$this->helper('Colorful')->importRedundant('ignored');
+            $ignoreCount = $this->ignoreCount;
+            $msg = number_format($ignoreCount).' '.__n('statistic has', 'statistics have', $ignoreCount);
+            $msg .= ' already been recorded and will be '.$this->helper('Colorful')->importRedundant('ignored');
             $this->out($msg);
         }
         if (! empty($this->toInsert)) {
@@ -227,7 +229,7 @@ class ImportShell extends Shell
             $stepCount += $insertCount;
         }
         if (! empty($this->toOverwrite)) {
-            $overwriteCount = count($this->toOverwriteO);
+            $overwriteCount = count($this->toOverwrite);
             $msg = number_format($overwriteCount).' existing '.__n('statistic', 'statistics', $overwriteCount);
             $msg .= ' will be '.$this->helper('Colorful')->importOverwrite('overwritten');
             $this->out($msg);
@@ -259,6 +261,7 @@ class ImportShell extends Shell
                 $percentDone = $this->getProgress($step, $stepCount);
                 $msg = "Importing: $percentDone";
                 $this->_io->overwrite($msg, 0);
+                $statisticsTable->save($statEntity);
             }
         }
 
@@ -270,6 +273,7 @@ class ImportShell extends Shell
                     $percentDone = $this->getProgress($step, $stepCount);
                     $msg = "Importing: $percentDone";
                     $this->_io->overwrite($msg, 0);
+                    $statisticsTable->save($statEntity);
                 }
             } else {
                 $this->out();
