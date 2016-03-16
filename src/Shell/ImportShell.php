@@ -71,6 +71,13 @@ class ImportShell extends Shell
         return $this->getOverwrite();
     }
 
+    private function getProgress($step, $stepCount)
+    {
+        $percentDone = round(($step/$stepCount) * 100);
+        $percentDone = str_pad($percentDone, 3, ' ', STR_PAD_LEFT);
+        return $percentDone.'%';
+    }
+
     private function menu()
     {
         $msg = "Available imports:\n";
@@ -138,8 +145,8 @@ class ImportShell extends Shell
             }
             foreach ($data as $category => $value) {
                 $step++;
-                $percentDone = round(($step/$dataPointCount) * 100);
-                $msg = "Preparing import: $percentDone%";
+                $percentDone = $this->getProgress($step, $dataPointCount);
+                $msg = "Preparing import: $percentDone";
                 $this->_io->overwrite($msg, 0);
 
                 // Look for matching records
@@ -225,8 +232,8 @@ class ImportShell extends Shell
             $this->out('Processing inserts...', 0);
             foreach ($this->toInsert as $record) {
                 $step++;
-                $percentDone = round(($step/$stepCount) * 100);
-                $msg = "Processing inserts: $percentDone%";
+                $percentDone = $this->getProgress($step, $stepCount);
+                $msg = "Processing inserts: $percentDone";
                 $this->_io->overwrite($msg, 0);
             }
             $this->out('');
@@ -237,8 +244,9 @@ class ImportShell extends Shell
             if ($this->getOverwrite()) {
                 $this->out('Processing updates...', 0);
                 foreach ($this->toOverwrite as $record) {
-                    $percentDone = round(($step/$stepCount) * 100);
-                    $msg = "Processing updates: $percentDone%";
+                    $step++;
+                    $percentDone = $this->getProgress($step, $stepCount);
+                    $msg = "Processing updates: $percentDone";
                     $this->_io->overwrite($msg, 0);
                 }
                 $this->out('');
