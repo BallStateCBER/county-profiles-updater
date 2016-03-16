@@ -8,12 +8,11 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property int $loc_type_id
- * @property \App\Model\Entity\LocType $loc_type
+ * @property \App\Model\Entity\LocationType $location_type
  * @property int $loc_id
- * @property \App\Model\Entity\Loc $loc
  * @property int $survey_date
  * @property int $category_id
- * @property \App\Model\Entity\Category $category
+ * @property \App\Model\Entity\DataCategory $data_category
  * @property float $value
  * @property \Cake\I18n\Time $created
  * @property \Cake\I18n\Time $modified

@@ -10,9 +10,8 @@ use Cake\Validation\Validator;
 /**
  * Statistics Model
  *
- * @property \Cake\ORM\Association\BelongsTo $LocTypes
- * @property \Cake\ORM\Association\BelongsTo $Locs
- * @property \Cake\ORM\Association\BelongsTo $Categories
+ * @property \Cake\ORM\Association\BelongsTo $LocationTypes
+ * @property \Cake\ORM\Association\BelongsTo $DataCategories
  * @property \Cake\ORM\Association\BelongsTo $Sources
  */
 class StatisticsTable extends Table
