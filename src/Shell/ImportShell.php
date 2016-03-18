@@ -16,49 +16,6 @@ class ImportShell extends Shell
     public $toOverwrite = [];
     public $ignoreCount = 0;
 
-    /**
-     * Returns the County Profiles DataCategory ID for
-     * a given category name as provided by CBERDataGrabber
-     *
-     * @param string $categoryName
-     * @return int
-     * @throws NotFoundException
-     */
-    private function getCategoryId($categoryName) {
-        switch ($categoryName) {
-            case 'Total Population':
-                return 1;
-            case 'Under 5':
-                return 272;
-            case '5 to 9':
-                return 273;
-            case '10 to 14':
-                return 274;
-            case '15 to 19':
-                return 275;
-            case '20 to 24':
-                return 276;
-            case '25 to 34':
-                return 277;
-            case '35 to 44':
-                return 278;
-            case '45 to 54':
-                return 279;
-            case '55 to 59':
-                return 280;
-            case '60 to 64':
-                return 281;
-            case '65 to 74':
-                return 282;
-            case '75 to 84':
-                return 283;
-            case '85 and over':
-                return 284;
-            default:
-                throw new NotFoundException("Unrecognized category: $categoryName");
-        }
-    }
-
     private function getOverwrite()
     {
         if ($this->overwrite == 'y') {
@@ -114,6 +71,8 @@ class ImportShell extends Shell
         $this->$methodName();
     }
 
+
+
     /**
      * @throws NotFoundException
      */
@@ -123,6 +82,22 @@ class ImportShell extends Shell
         $locationTypeId = 2; // County
         $surveyDate = $year.'0000';
         $sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
+        $categoryIds = [
+            'Total Population' => 1,
+            'Under 5' => 272,
+            '5 to 9' => 273,
+            '10 to 14' => 274,
+            '15 to 19' => 275,
+            '20 to 24' => 276,
+            '25 to 34' => 277,
+            '35 to 44' => 278,
+            '45 to 54' => 279,
+            '55 to 59' => 280,
+            '60 to 64' => 281,
+            '65 to 74' => 282,
+            '75 to 84' => 283,
+            '85 and over' => 284
+        ];
 
         $this->out('Retrieving data from Census API...');
         $results = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
@@ -160,7 +135,11 @@ class ImportShell extends Shell
                 $this->_io->overwrite($msg, 0);
 
                 // Look for matching records
-                $categoryId = $this->getCategoryId($category);
+                if (! isset($categoryIds[$category])) {
+                    $msg = $this->helper('Colorful')->error("Unrecognized category: $category");
+                    $this->abort($msg);
+                }
+                $categoryId = $categoryIds[$category];
                 $conditions = [
                     'loc_type_id' => $locationTypeId,
                     'loc_id' => $locationId,
