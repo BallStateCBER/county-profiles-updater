@@ -71,36 +71,9 @@ class ImportShell extends Shell
         $this->$methodName();
     }
 
-
-
-    /**
-     * @throws NotFoundException
-     */
-    public function importPopulationAge() {
-        $year = '2013';
-        $stateId = '18'; // Indiana
-        $locationTypeId = 2; // County
-        $surveyDate = $year.'0000';
-        $sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
-        $categoryIds = [
-            'Total Population' => 1,
-            'Under 5' => 272,
-            '5 to 9' => 273,
-            '10 to 14' => 274,
-            '15 to 19' => 275,
-            '20 to 24' => 276,
-            '25 to 34' => 277,
-            '35 to 44' => 278,
-            '45 to 54' => 279,
-            '55 to 59' => 280,
-            '60 to 64' => 281,
-            '65 to 74' => 282,
-            '75 to 84' => 283,
-            '85 and over' => 284
-        ];
-
-        $this->out('Retrieving data from Census API...');
-        $results = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
+    private function prepareImport($params)
+    {
+        extract($params);
 
         if (empty($results)) {
             $msg = $this->helper('Colorful')->error('No data returned');
@@ -222,6 +195,44 @@ class ImportShell extends Shell
             $this->out('Nothing to import');
             exit();
         }
+    }
+
+    /**
+     * @throws NotFoundException
+     */
+    public function importPopulationAge() {
+        $year = '2013';
+        $stateId = '18'; // Indiana
+        $locationTypeId = 2; // County
+        $surveyDate = $year.'0000';
+        $sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
+        $categoryIds = [
+            'Total Population' => 1,
+            'Under 5' => 272,
+            '5 to 9' => 273,
+            '10 to 14' => 274,
+            '15 to 19' => 275,
+            '20 to 24' => 276,
+            '25 to 34' => 277,
+            '35 to 44' => 278,
+            '45 to 54' => 279,
+            '55 to 59' => 280,
+            '60 to 64' => 281,
+            '65 to 74' => 282,
+            '75 to 84' => 283,
+            '85 and over' => 284
+        ];
+
+        $this->out('Retrieving data from Census API...');
+        $results = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
+
+        $this->prepareImport(compact(
+            'categoryIds',
+            'locationTypeId',
+            'results',
+            'sourceId',
+            'surveyDate'
+        ));
 
         $begin = $this->in('Begin import?', ['y', 'n'], 'y');
         if ($begin == 'n') {
