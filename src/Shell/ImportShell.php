@@ -20,6 +20,7 @@ class ImportShell extends Shell
     public $surveyDate = null;
     public $toInsert = [];
     public $toOverwrite = [];
+    public $stepCount = 0;
 
     private function getOverwrite()
     {
@@ -169,7 +170,7 @@ class ImportShell extends Shell
         }
         $this->out();
 
-        $stepCount = 0;
+        $this->stepCount = 0;
         if ($this->ignoreCount) {
             $ignoreCount = $this->ignoreCount;
             $msg = number_format($ignoreCount).' '.__n('statistic has', 'statistics have', $ignoreCount);
@@ -181,7 +182,7 @@ class ImportShell extends Shell
             $msg = number_format($insertCount).' '.__n('statistic', 'statistics', $insertCount);
             $msg .= ' will be '.$this->helper('Colorful')->importInsert('added');
             $this->out($msg);
-            $stepCount += $insertCount;
+            $this->stepCount += $insertCount;
         }
         if (! empty($this->toOverwrite)) {
             $overwriteCount = count($this->toOverwrite);
@@ -189,15 +190,62 @@ class ImportShell extends Shell
             $msg .= ' will be '.$this->helper('Colorful')->importOverwrite('overwritten');
             $this->out($msg);
             if ($this->getOverwrite()) {
-                $stepCount += $overwriteCount;
+                $this->stepCount += $overwriteCount;
             }
         }
         $this->out();
 
-        if ($stepCount == 0) {
+        if ($this->stepCount == 0) {
             $this->out('Nothing to import');
             exit();
         }
+
+        $begin = $this->in('Begin import?', ['y', 'n'], 'y');
+        if ($begin == 'n') {
+            exit();
+        }
+    }
+
+    private function import()
+    {
+        $step = 0;
+        $percentDone = $this->getProgress($step, $this->stepCount);
+        $msg = "Importing: $percentDone";
+        $this->out($msg, 0);
+        $statisticsTable = TableRegistry::get('Statistics');
+
+        // Insert
+        if (! empty($this->toInsert)) {
+            foreach ($this->toInsert as $i => $statEntity) {
+                $step++;
+                $percentDone = $this->getProgress($step, $this->stepCount);
+                $msg = "Importing: $percentDone";
+                $this->_io->overwrite($msg, 0);
+                $statisticsTable->save($statEntity);
+            }
+        }
+
+        // Overwrite
+        if (! empty($this->toOverwrite)) {
+            if ($this->getOverwrite()) {
+                foreach ($this->toOverwrite as $i => $statEntity) {
+                    $step++;
+                    $percentDone = $this->getProgress($step, $this->stepCount);
+                    $msg = "Importing: $percentDone";
+                    $this->_io->overwrite($msg, 0);
+                    $statisticsTable->save($statEntity);
+                }
+            } else {
+                $this->out();
+                $msg = $overwriteCount.' updated '.__n('statistic', 'statistics', $overwriteCount).' ignored';
+                $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
+                $this->out($msg);
+            }
+        }
+
+        $this->out();
+        $msg = $this->helper('Colorful')->success('Import complete');
+        $this->out($msg);
     }
 
     /**
@@ -230,48 +278,6 @@ class ImportShell extends Shell
         $this->apiCallResults = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
 
         $this->prepareImport();
-
-        $begin = $this->in('Begin import?', ['y', 'n'], 'y');
-        if ($begin == 'n') {
-            exit();
-        }
-        $step = 0;
-
-        $percentDone = $this->getProgress($step, $stepCount);
-        $msg = "Importing: $percentDone";
-        $this->out($msg, 0);
-
-        // Insert
-        if (! empty($this->toInsert)) {
-            foreach ($this->toInsert as $i => $statEntity) {
-                $step++;
-                $percentDone = $this->getProgress($step, $stepCount);
-                $msg = "Importing: $percentDone";
-                $this->_io->overwrite($msg, 0);
-                $statisticsTable->save($statEntity);
-            }
-        }
-
-        // Overwrite
-        if (! empty($this->toOverwrite)) {
-            if ($this->getOverwrite()) {
-                foreach ($this->toOverwrite as $i => $statEntity) {
-                    $step++;
-                    $percentDone = $this->getProgress($step, $stepCount);
-                    $msg = "Importing: $percentDone";
-                    $this->_io->overwrite($msg, 0);
-                    $statisticsTable->save($statEntity);
-                }
-            } else {
-                $this->out();
-                $msg = $overwriteCount.' updated '.__n('statistic', 'statistics', $overwriteCount).' ignored';
-                $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
-                $this->out($msg);
-            }
-        }
-
-        $this->out();
-        $msg = $this->helper('Colorful')->success('Import complete');
-        $this->out($msg);
+        $this->import();
     }
 }
