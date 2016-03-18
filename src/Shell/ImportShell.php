@@ -11,10 +11,15 @@ use CBERDataGrabber\ACSUpdater;
 
 class ImportShell extends Shell
 {
+    public $apiCallResults = [];
+    public $categoryIds = [];
+    public $ignoreCount = 0;
+    public $locationTypeId = null;
     public $overwrite = null;
+    public $sourceId = null;
+    public $surveyDate = null;
     public $toInsert = [];
     public $toOverwrite = [];
-    public $ignoreCount = 0;
 
     private function getOverwrite()
     {
@@ -71,21 +76,19 @@ class ImportShell extends Shell
         $this->$methodName();
     }
 
-    private function prepareImport($params)
+    private function prepareImport()
     {
-        extract($params);
-
-        if (empty($results)) {
+        if (empty($this->apiCallResults)) {
             $msg = $this->helper('Colorful')->error('No data returned');
             $this->abort($msg);
         }
 
         // Get totals for what was returned
         $dataPointCount = 0;
-        foreach ($results as $fips => $data) {
+        foreach ($this->apiCallResults as $fips => $data) {
             $dataPointCount += count($data);
         }
-        $locationCount = count($results);
+        $locationCount = count($this->apiCallResults);
         $msg = number_format($dataPointCount).__n(' data point ', ' data points ', $dataPointCount);
         $msg .= 'found for '.number_format($locationCount).' locations';
         $this->out($msg, 2);
@@ -95,8 +98,8 @@ class ImportShell extends Shell
         $statisticsTable = TableRegistry::get('Statistics');
         $this->out('Preparing import...', 0);
         $step = 0;
-        foreach ($results as $fips => $data) {
-            $locationId = $Location->getIdFromCode($fips, $locationTypeId);
+        foreach ($this->apiCallResults as $fips => $data) {
+            $locationId = $Location->getIdFromCode($fips, $this->locationTypeId);
             if (! $locationId) {
                 $msg = $this->helper('Colorful')->error("FIPS code $fips does not correspond to any known county.");
                 $this->abort($msg);
@@ -108,15 +111,15 @@ class ImportShell extends Shell
                 $this->_io->overwrite($msg, 0);
 
                 // Look for matching records
-                if (! isset($categoryIds[$category])) {
+                if (! isset($this->categoryIds[$category])) {
                     $msg = $this->helper('Colorful')->error("Unrecognized category: $category");
                     $this->abort($msg);
                 }
-                $categoryId = $categoryIds[$category];
+                $categoryId = $this->categoryIds[$category];
                 $conditions = [
-                    'loc_type_id' => $locationTypeId,
+                    'loc_type_id' => $this->locationTypeId,
                     'loc_id' => $locationId,
-                    'survey_date' => $surveyDate,
+                    'survey_date' => $this->surveyDate,
                     'category_id' => $categoryId
                 ];
                 $results = $statisticsTable->find('all')
@@ -133,7 +136,7 @@ class ImportShell extends Shell
                 // Prepare record for inserting / overwriting
                 $newRecord = $conditions;
                 $newRecord['value'] = $value;
-                $newRecord['source_id'] = $sourceId;
+                $newRecord['source_id'] = $this->sourceId;
 
                 // Mark for insertion
                 if ($count == 0) {
@@ -203,10 +206,10 @@ class ImportShell extends Shell
     public function importPopulationAge() {
         $year = '2013';
         $stateId = '18'; // Indiana
-        $locationTypeId = 2; // County
-        $surveyDate = $year.'0000';
-        $sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
-        $categoryIds = [
+        $this->locationTypeId = 2; // County
+        $this->surveyDate = $year.'0000';
+        $this->sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
+        $this->categoryIds = [
             'Total Population' => 1,
             'Under 5' => 272,
             '5 to 9' => 273,
@@ -224,15 +227,9 @@ class ImportShell extends Shell
         ];
 
         $this->out('Retrieving data from Census API...');
-        $results = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
+        $this->apiCallResults = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
 
-        $this->prepareImport(compact(
-            'categoryIds',
-            'locationTypeId',
-            'results',
-            'sourceId',
-            'surveyDate'
-        ));
+        $this->prepareImport();
 
         $begin = $this->in('Begin import?', ['y', 'n'], 'y');
         if ($begin == 'n') {
