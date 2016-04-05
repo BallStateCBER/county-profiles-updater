@@ -30,12 +30,11 @@ or data that is already present in the database and can be **ignored**
 for permission to overwrite existing records if appropriate.
 4. *MAGIC*
 
-To add a new import method:
+Adding new import methods
+-------------------------
 
-- Add `import{CategoryName}()` to `src/Shell/ImportShell.php` (e.g. `importPopulationAge()`).
+Add `import{CategoryName}()` to `src/Shell/ImportShell.php` (e.g. `importPopulationAge()`).
 This should set the class properties `locationTypeId`, `surveyDate`, `sourceId`, and `categoryIds`,
 then output `'Retrieving data from Census API...'`, then populate `apiCallResults` with the
 result of a call to a [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber)
 method. The import method should then finish up with a call to `$this->import();`.
-- This import method should be added to the output of `menu()` in `src/Shell/ImportShell.php`
-as `- categoryName`.
