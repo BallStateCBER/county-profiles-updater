@@ -53,8 +53,18 @@ class ImportShell extends Shell
 
     private function menu()
     {
-        $msg = "Available imports:\n";
-        $msg .= "- populationAge";
+        $msg = "Available imports:";
+
+        $methods = get_class_methods($this);
+        $imports = [];
+        foreach ($methods as $method) {
+            if (strpos($method, 'import') === 0 && $method != 'import') {
+                $importName = str_replace('import', '', $method);
+                $imports[] = lcfirst($importName);
+            }
+        }
+
+        $msg .= empty($imports) ? " (none)" : "\n- ".implode($imports, "\n- ");
         $this->out($msg);
     }
 
@@ -253,7 +263,8 @@ class ImportShell extends Shell
     /**
      * @throws NotFoundException
      */
-    public function importPopulationAge() {
+    public function importPopulationAge()
+    {
         $year = '2013';
         $stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
