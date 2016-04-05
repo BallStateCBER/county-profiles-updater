@@ -1,26 +1,41 @@
-# CakePHP Application Skeleton
+County Profiles Updater
+=======================
 
-[![Build Status](https://api.travis-ci.org/cakephp/app.png)](https://travis-ci.org/cakephp/app)
-[![License](https://poser.pugx.org/cakephp/app/license.svg)](https://packagist.org/packages/cakephp/app)
+Uses the [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber) in a shell script
+to pull US federal data from various APIs and update the [County Profiles](http://profiles.cberdata.org)
+website, produced by [Ball State University](http://bsu.edu)'s
+[Center for Business and Economic Research](http://cberdata.org).
 
-A skeleton for creating applications with [CakePHP](http://cakephp.org) 3.x.
+Usage
+-----
 
-The framework source code can be found here: [cakephp/cakephp](https://github.com/cakephp/cakephp).
+When installed on the same server as County Profiles and `config/app.php` is set up with the correct
+database connection settings, this app interfaces with the County Profiles database.
 
-## Installation
+To fire it up,
 
-1. Download [Composer](http://getcomposer.org/doc/00-intro.md) or update `composer self-update`.
-2. Run `php composer.phar create-project --prefer-dist cakephp/app [app_name]`.
+    cd C:\path\to\app
+    bin\cake import {importName}
 
-If Composer is installed globally, run
-```bash
-composer create-project --prefer-dist cakephp/app [app_name]
-```
+If you leave out `importName` (i.e. just enter `bin\cake import`), a menu of available imports will be
+presented for you to select from.
 
-You should now be able to visit the path to where you installed the app and see
-the setup traffic lights.
+The selected import proceeds thusly:
 
-## Configuration
+1. Data is pulled from the API
+2. This data is checked for errors and it's determined whether this is data that
+it needs to **insert** into the database, data that needs to **update** existing records,
+or data that is already present in the database and can be **ignored**
+3. Assuming there's data to import, the script asks for confirmation to proceed and
+for permission to overwrite existing records if appropriate.
+4. *MAGIC*
 
-Read and edit `config/app.php` and setup the 'Datasources' and any other
-configuration relevant for your application.
+To add a new import method:
+
+- Add `import{CategoryName}()` to `src/Shell/ImportShell.php` (e.g. `importPopulationAge()`).
+This should set the class properties `locationTypeId`, `surveyDate`, `sourceId`, and `categoryIds`,
+then output `'Retrieving data from Census API...'`, then populate `apiCallResults` with the
+result of a call to a [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber)
+method. The import method should then finish up with a call to `$this->import();`.
+- This import method should be added to the output of `menu()` in `src/Shell/ImportShell.php`
+as `- categoryName`.
