@@ -208,6 +208,8 @@ class ImportShell extends Shell
 
     private function import()
     {
+        $this->prepareImport();
+
         $step = 0;
         $percentDone = $this->getProgress($step, $this->stepCount);
         $msg = "Importing: $percentDone";
@@ -277,7 +279,6 @@ class ImportShell extends Shell
         $this->out('Retrieving data from Census API...');
         $this->apiCallResults = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
 
-        $this->prepareImport();
         $this->import();
     }
 }
