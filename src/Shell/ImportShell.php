@@ -4,23 +4,47 @@ namespace App\Shell;
 use App\Location\Location;
 use Cake\Console\Shell;
 use Cake\Core\Configure;
+use Cake\Filesystem\Folder;
 use Cake\Network\Exception\InternalErrorException;
 use Cake\Network\Exception\NotFoundException;
 use Cake\ORM\TableRegistry;
-use CBERDataGrabber\ACSUpdater;
+use Cake\Utility\Inflector;
 
 class ImportShell extends Shell
 {
     public $apiCallResults = [];
+    public $apiKey = null;
+    public $availableImports = [];
     public $categoryIds = [];
     public $ignoreCount = 0;
     public $locationTypeId = null;
     public $overwrite = null;
     public $sourceId = null;
+    public $stepCount = 0;
     public $surveyDate = null;
     public $toInsert = [];
     public $toOverwrite = [];
-    public $stepCount = 0;
+    public $year = null;
+    public $stateId = null;
+
+    public function getOptionParser()
+    {
+        $parser = parent::getOptionParser();
+        $parser->description('CBER County Profiles website data importer');
+        $parser->addArgument('import name', [
+            'help' => 'The name of an import to run, such as PopulationAge',
+            'required' => false
+        ]);
+        return $parser;
+    }
+
+    public function abort($message = null, $exitCode = self::CODE_ERROR)
+    {
+        if ($message) {
+            $message = $this->helper('Colorful')->error($message);
+        }
+        return parent::abort($message);
+    }
 
     private function getOverwrite()
     {
@@ -47,51 +71,65 @@ class ImportShell extends Shell
         $msg = __n('Error', 'Errors', $count).' creating a statistic entity: ';
         $msg = $this->helper('Colorful')->error($msg);
         $this->out($msg);
-        $this->out(pr($errors));
+        $this->out(print_r($errors, true));
         $this->abort();
     }
 
+    /**
+     * Menu of available imports
+     *
+     * @return int Key for $this->availableImports()
+     */
     private function menu()
     {
-        $msg = "Available imports:";
-
-        $methods = get_class_methods($this);
-        $imports = [];
-        foreach ($methods as $method) {
-            if (strpos($method, 'import') === 0 && $method != 'import') {
-                $importName = str_replace('import', '', $method);
-                $imports[] = lcfirst($importName);
-            }
+        $this->out('Available imports:');
+        $available = $this->availableImports();
+        foreach ($available as $k => $import) {
+            $this->out("[$k] $import");
         }
-
-        $msg .= empty($imports) ? " (none)" : "\n- ".implode($imports, "\n- ");
-        $this->out($msg);
+        $this->out('');
+        $msg = 'Please select an import to run: ';
+        if (count($available) > 1) {
+            $msg .= '[0-'.(count($available) - 1).']';
+        } else {
+            $msg .= '[0]';
+        }
+        $importNum = $this->in($msg);
+        if ($this->availableImports($importNum)) {
+            return $importNum;
+        }
+        $this->out('Invalid selection', 2);
+        return $this->menu();
     }
 
     public function main($importName = null)
     {
-        if (empty($importName)) {
-            $this->menu();
-            $importName = $this->in('Please select an import to run:');
+        // Process $importName parameter (e.g. "bin\cake import PopulationAge")
+        $importNum = false;
+        if ($importName) {
+            $importNum = array_search($importName, $this->availableImports());
+            if ($importNum === false) {
+                $this->out("Import \"$importName\" not found", 2);
+            }
         }
 
-        $methodName = 'import'.ucwords($importName);
-        if (! method_exists($this, $methodName)) {
-            $this->out("Import \"$importName\" not recognized.\n");
-            $this->menu();
-            $importName = $this->in('Please select a valid import to run:');
+        // Display menu of available imports
+        if ($importNum === false) {
+            $importNum = $this->menu();
         }
 
-        $apiKey = Configure::read('census_api_key');
-        ACSUpdater::setAPIKey($apiKey);
-        $this->$methodName();
+        // Run import
+        $importName = $this->availableImports($importNum);
+        $importClass = "App\\Shell\\Imports\\{$importName}Shell";
+        $importObj = new $importClass();
+        $importObj->apiKey = Configure::read('census_api_key');
+        $importObj->run();
     }
 
     private function prepareImport()
     {
         if (empty($this->apiCallResults)) {
-            $msg = $this->helper('Colorful')->error('No data returned');
-            $this->abort($msg);
+            $this->abort('No data returned');
         }
 
         // Get totals for what was returned
@@ -112,8 +150,7 @@ class ImportShell extends Shell
         foreach ($this->apiCallResults as $fips => $data) {
             $locationId = $Location->getIdFromCode($fips, $this->locationTypeId);
             if (! $locationId) {
-                $msg = $this->helper('Colorful')->error("FIPS code $fips does not correspond to any known county.");
-                $this->abort($msg);
+                $this->abort("FIPS code $fips does not correspond to any known county.");
             }
             foreach ($data as $category => $value) {
                 $step++;
@@ -123,8 +160,7 @@ class ImportShell extends Shell
 
                 // Look for matching records
                 if (! isset($this->categoryIds[$category])) {
-                    $msg = $this->helper('Colorful')->error("Unrecognized category: $category");
-                    $this->abort($msg);
+                    $this->abort("Unrecognized category: $category");
                 }
                 $categoryId = $this->categoryIds[$category];
                 $conditions = [
@@ -139,9 +175,7 @@ class ImportShell extends Shell
                     ->toArray();
                 $count = count($results);
                 if ($count > 1) {
-                    $msg = "Problem: More than one statistics record found matching ".print_r($conditions, true);
-                    $msg = $this->helper('Colorful')->error($msg);
-                    $this->abort($msg);
+                    $this->abort("Problem: More than one statistics record found matching ".print_r($conditions, true));
                 }
 
                 // Prepare record for inserting / overwriting
@@ -207,16 +241,16 @@ class ImportShell extends Shell
 
         if ($this->stepCount == 0) {
             $this->out('Nothing to import');
-            exit();
+            $this->_stop();
         }
 
         $begin = $this->in('Begin import?', ['y', 'n'], 'y');
         if ($begin == 'n') {
-            exit();
+            $this->_stop();
         }
     }
 
-    private function import()
+    protected function import()
     {
         $this->prepareImport();
 
@@ -260,36 +294,43 @@ class ImportShell extends Shell
         $this->out($msg);
     }
 
-    /**
-     * @throws NotFoundException
-     */
-    public function importPopulationAge()
+    public function makeApiCall($callable)
     {
-        $year = '2013';
-        $stateId = '18'; // Indiana
-        $this->locationTypeId = 2; // County
-        $this->surveyDate = $year.'0000';
-        $this->sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
-        $this->categoryIds = [
-            'Total Population' => 1,
-            'Under 5' => 272,
-            '5 to 9' => 273,
-            '10 to 14' => 274,
-            '15 to 19' => 275,
-            '20 to 24' => 276,
-            '25 to 34' => 277,
-            '35 to 44' => 278,
-            '45 to 54' => 279,
-            '55 to 59' => 280,
-            '60 to 64' => 281,
-            '65 to 74' => 282,
-            '75 to 84' => 283,
-            '85 and over' => 284
-        ];
+        try {
+            $this->apiCallResults = $callable();
+        } catch (\Exception $e) {
+            $this->abort('Error: '.$e->getMessage());
+        }
+    }
 
-        $this->out('Retrieving data from Census API...');
-        $this->apiCallResults = ACSUpdater::getCountyData($year, $stateId, ACSUpdater::$POPULATION_AGE, false);
+    /**
+     * Returns array of names of available imports, or a specific
+     * import name if $key is provided. Returns FALSE if $key is
+     * invalid. Attempts to populate $this->availableImports
+     * when called for the first time and aborts program if it cannot.
+     *
+     * @param int $key
+     * @return string|boolean
+     */
+    private function availableImports($key = null)
+    {
+        if (empty($this->availableImports)) {
+            $dir = new Folder(APP.'Shell'.DS.'Imports');
+            $files = $dir->find('.*Shell\.php');
+            if (empty($files)) {
+                $this->abort('No imports are available to run');
+            }
+            sort($files);
+            foreach ($files as $k => $filename) {
+                $name = str_replace('Shell.php', '', $filename);
+                $this->availableImports[] = $name;
+            }
+        }
 
-        $this->import();
+        if ($key !== null) {
+            return isset($this->availableImports[$key]) ? $this->availableImports[$key] : false;
+        }
+
+        return $this->availableImports;
     }
 }
