@@ -71,10 +71,15 @@ To set up a means to update `Foo` data through this Shell, create the file `src/
 The method `run()` must
 
 1. Set the object properties `locationTypeId`, `surveyDate`, `sourceId`, and `categoryIds`
-   (the County Profiles [Data Categories Manager](http://profiles.cberdata.org/admin/data_categories) can help find data category IDs easier)
+   (the County Profiles class `/Model/SegmentData.php` and the [Data Categories Manager](http://profiles.cberdata.org/admin/data_categories) will help you determine the right category IDs to use)
 2. Output `'Retrieving data from {data source}...'`
 3. Set any API key necessary
 4. Call `$this->apiCallResults($callable)` with a function that returns the result of a a call to a [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber) method
 5. Call `$this->import();`
 
 After creating this class, `Foo` will appear in the list of available imports.
+
+After import
+------------
+
+After an import completes, update the relevant method in `/Model/SegmentData.php` in County Profiles with the appropriate new year.
