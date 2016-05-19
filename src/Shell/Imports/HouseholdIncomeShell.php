@@ -16,36 +16,45 @@ class HouseholdIncomeShell extends ImportShell
         $this->sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
         $this->categoryIds = [
             'Number of Households' => 11,
-            'Less than $10K' => 223,
-            '$10K to $14,999' => 224,
-            '$15K to $24,999' => 225,
-            '$25K to $34,999' => 226,
-            '$35K to $49,999' => 227,
-            '$50K to $74,999' => 228,
-            '$75K to $99,999' => 229,
-            '$100K to $149,999' => 230,
-            '$150K to $199,999' => 231,
-            '$200K or more' => 232
+            'Less than $10K' => 135,
+            '$10K to $14,999' => 14,
+            '$15K to $24,999' => 15,
+            '$25K to $34,999' => 16,
+            '$35K to $49,999' => 17,
+            '$50K to $74,999' => 18,
+            '$75K to $99,999' => 19,
+            '$100K to $149,999' => 20,
+            '$150K to $199,999' => 136,
+            '$200K or more' => 137,
+            'Percent: Less than $10K' => 223,
+            'Percent: $10K to $14,999' => 224,
+            'Percent: $15K to $24,999' => 225,
+            'Percent: $25K to $34,999' => 226,
+            'Percent: $35K to $49,999' => 227,
+            'Percent: $50K to $74,999' => 228,
+            'Percent: $75K to $99,999' => 229,
+            'Percent: $100K to $149,999' => 230,
+            'Percent: $150K to $199,999' => 231,
+            'Percent: $200K or more' => 232
         ];
 
         $this->out('Retrieving data from Census API...');
         ACSUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
-            // Convert from count of households to percentage of households
+            // Calculate "percentage of households" values
             $categoryNames = array_keys($this->categoryIds);
             $householdCountCategory = array_shift($categoryNames);
             $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$HOUSEHOLD_INCOME, false);
-            $convertedResults = [];
-            foreach ($results as $fips => $data) {
+            foreach ($results as $fips => &$data) {
                 $householdCount = $data[$householdCountCategory];
-                unset($data[$householdCountCategory]);
-                $countyData = [$householdCountCategory => $householdCount];
                 foreach ($data as $category => $count) {
-                    $countyData[$category] = ($count / $householdCount) * 100;
+                    if ($category != 'Number of Households') {
+                        $percent = ($count / $householdCount) * 100;
+                        $data["Percent: $category"] = $percent;
+                    }
                 }
-                $convertedResults[$fips] = $countyData;
             }
-            return $convertedResults;
+            return $results;
         });
 
         $this->import();
