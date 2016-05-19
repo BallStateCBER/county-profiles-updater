@@ -30,11 +30,47 @@ or data that is already present in the database and can be **ignored**
 for permission to overwrite existing records if appropriate.
 4. *MAGIC*
 
-Adding new import methods
+Adding new imports
 -------------------------
+To set up a means to update `Foo` data through this Shell, create the file `src/Shell/Imports/FooShell.php`, changing `ACSUpdater` to a different class if needed.
 
-Add `import{CategoryName}()` to `src/Shell/ImportShell.php` (e.g. `importPopulationAge()`).
-This should set the class properties `locationTypeId`, `surveyDate`, `sourceId`, and `categoryIds`,
-then output `'Retrieving data from Census API...'`, then populate `apiCallResults` with the
-result of a call to a [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber)
-method. The import method should then finish up with a call to `$this->import();`.
+    <?php
+    namespace App\Shell\Imports;
+
+    use App\Location\Location;
+    use App\Shell\ImportShell;
+    use CBERDataGrabber\ACSUpdater;
+
+    class FooShell extends ImportShell
+    {
+        public function run()
+        {
+            $defaultYear = 2014;
+            $this->year = $this->in('What year do you want to import data for?', null, $defaultYear);
+            $this->stateId = '18'; // Indiana
+            $this->locationTypeId = 2; // County
+            $this->surveyDate = $this->year.'0000';
+            $this->sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
+            $this->categoryIds = [
+                'First data category name' => 123,
+                'Another data category name' => 456
+            ];
+
+            $this->out('Retrieving data from Census API...');
+            ACSUpdater::setAPIKey($this->apiKey);
+            $this->makeApiCall(function () {
+                return ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$FOO, false);
+            });
+
+            $this->import();
+        }
+    }
+
+The method `run()` must
+1. Set the object properties `locationTypeId`, `surveyDate`, `sourceId`, and `categoryIds`
+2. Output `'Retrieving data from {data source}...'`
+3. Set any API key necessary
+4. Call `$this->apiCallResults($callable)` with a function that returns the result of a a call to a [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber) method
+5. Call `$this->import();`
+
+After creating this class, `Foo` will appear in the list of available imports.
