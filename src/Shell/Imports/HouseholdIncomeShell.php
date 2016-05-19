@@ -50,7 +50,7 @@ class HouseholdIncomeShell extends ImportShell
                 foreach ($data as $category => $count) {
                     if ($category != 'Number of Households') {
                         $percent = ($count / $householdCount) * 100;
-                        $data["Percent: $category"] = $percent;
+                        $data["Percent: $category"] = round($percent, 2);
                     }
                 }
             }
