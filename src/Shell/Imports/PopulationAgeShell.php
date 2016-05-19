@@ -7,9 +7,6 @@ use CBERDataGrabber\ACSUpdater;
 
 class PopulationAgeShell extends ImportShell
 {
-    /**
-     * @throws NotFoundException
-     */
     public function run()
     {
         $this->year = $this->in('What year do you want to import data for?', null, 2014);
