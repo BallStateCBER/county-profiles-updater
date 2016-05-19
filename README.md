@@ -84,3 +84,4 @@ After import
 
 - After an import completes, update the relevant method in `/Model/SegmentData.php` in County Profiles with the appropriate new year.
 - Load `http://profiles.cberdata.org/data_center/pages/clear_cache` to clear old cached charts/tables.
+- If the relevant segment description (set in the `segments` database table) references data from the old year, update it to reflect the new year.
