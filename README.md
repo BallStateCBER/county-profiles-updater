@@ -82,4 +82,5 @@ After creating this class, `Foo` will appear in the list of available imports.
 After import
 ------------
 
-After an import completes, update the relevant method in `/Model/SegmentData.php` in County Profiles with the appropriate new year.
+- After an import completes, update the relevant method in `/Model/SegmentData.php` in County Profiles with the appropriate new year.
+- Load `http://profiles.cberdata.org/data_center/pages/clear_cache` to clear old cached charts/tables.
