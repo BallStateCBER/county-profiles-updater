@@ -12,13 +12,15 @@ Usage
 When installed on the same server as County Profiles and `config/app.php` is set up with the correct
 database connection settings, this app interfaces with the County Profiles database.
 
-To fire it up,
+To view the menu and select an import:
+
+    cd C:\path\to\app
+    bin\cake import
+
+To skip the menu and run a specific import:
 
     cd C:\path\to\app
     bin\cake import {importName}
-
-If you leave out `importName` (i.e. just enter `bin\cake import`), a menu of available imports will be
-presented for you to select from.
 
 The selected import proceeds thusly:
 
