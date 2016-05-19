@@ -71,6 +71,7 @@ To set up a means to update `Foo` data through this Shell, create the file `src/
 The method `run()` must
 
 1. Set the object properties `locationTypeId`, `surveyDate`, `sourceId`, and `categoryIds`
+   The County Profiles [Data Categories Manager](http://profiles.cberdata.org/admin/data_categories) can help find data category IDs easier.
 2. Output `'Retrieving data from {data source}...'`
 3. Set any API key necessary
 4. Call `$this->apiCallResults($callable)` with a function that returns the result of a a call to a [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber) method
