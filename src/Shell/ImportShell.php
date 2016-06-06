@@ -30,7 +30,7 @@ class ImportShell extends Shell
     public function getOptionParser()
     {
         $parser = parent::getOptionParser();
-        $parser->description('CBER County Profiles website data importer');
+        $parser->description('CBER County Profiles Data Importer');
         $parser->addArgument('import name', [
             'help' => 'The name of an import to run, such as PopulationAge',
             'required' => false
