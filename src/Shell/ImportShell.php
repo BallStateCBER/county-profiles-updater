@@ -123,7 +123,7 @@ class ImportShell extends Shell
         $importClass = "App\\Shell\\Imports\\{$importName}Shell";
         $importObj = new $importClass();
         $importObj->apiKey = Configure::read('census_api_key');
-        $importObj->run();
+        return $importObj->run();
     }
 
     private function prepareImport()
@@ -292,6 +292,8 @@ class ImportShell extends Shell
         $this->out();
         $msg = $this->helper('Colorful')->success('Import complete');
         $this->out($msg);
+
+        return true;
     }
 
     public function makeApiCall($callable)

@@ -58,10 +58,10 @@ class ColorfulHelper extends Helper
                 $styles = $this->setFg('light_green');
                 break;
             case 'import-overwrite-blocked':
-                $styles = $this->setBg('yellow');
+                $styles = $this->setFg('yellow');
                 break;
             case 'import-redundant':
-                $styles = $this->setBg('yellow');
+                $styles = $this->setFg('yellow');
                 break;
             case 'menu-option':
                 $styles = $this->setFg('light_green');
