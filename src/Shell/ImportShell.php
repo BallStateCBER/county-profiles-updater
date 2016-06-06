@@ -85,7 +85,7 @@ class ImportShell extends Shell
         $this->out('Available imports:');
         $available = $this->availableImports();
         foreach ($available as $k => $import) {
-            $this->out("[$k] $import");
+            $this->out("[$k] ".$this->helper('Colorful')->menuOption($import));
         }
         $this->out('');
         $msg = 'Please select an import to run: ';
@@ -98,7 +98,7 @@ class ImportShell extends Shell
         if ($this->availableImports($importNum)) {
             return $importNum;
         }
-        $this->out('Invalid selection', 2);
+        $this->out($this->helper('Colorful')->error('Invalid selection'), 2);
         return $this->menu();
     }
 

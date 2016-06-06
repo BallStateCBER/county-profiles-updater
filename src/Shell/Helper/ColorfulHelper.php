@@ -63,6 +63,9 @@ class ColorfulHelper extends Helper
             case 'import-redundant':
                 $styles = $this->setBg('yellow');
                 break;
+            case 'menu-option':
+                $styles = $this->setFg('light_green');
+                break;
             default:
                 throw new InternalErrorException('Unrecognized message style: '.$type);
         }
@@ -97,5 +100,10 @@ class ColorfulHelper extends Helper
     public function importRedundant($msg)
     {
         return $this->output(['import-redundant', $msg]);
+    }
+
+    public function menuOption($msg)
+    {
+        return $this->output(['menu-option', $msg]);
     }
 }
