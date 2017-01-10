@@ -44,7 +44,7 @@ class HouseholdIncomeShell extends ImportShell
             // Calculate "percentage of households" values
             $categoryNames = array_keys($this->categoryIds);
             $householdCountCategory = array_shift($categoryNames);
-            $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$HOUSEHOLD_INCOME, false);
+            $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$HOUSEHOLD_INCOME);
             foreach ($results as $fips => &$data) {
                 $householdCount = $data[$householdCountCategory];
                 foreach ($data as $category => $count) {

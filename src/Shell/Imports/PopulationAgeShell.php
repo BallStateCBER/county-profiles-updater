@@ -34,7 +34,7 @@ class PopulationAgeShell extends ImportShell
         $this->out('Retrieving data from Census API...');
         ACSUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
-            return ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$POPULATION_AGE, false);
+            return ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$POPULATION_AGE);
         });
 
         $this->import();
