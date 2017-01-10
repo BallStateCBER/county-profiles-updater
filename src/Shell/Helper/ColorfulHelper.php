@@ -2,6 +2,7 @@
 namespace App\Shell\Helper;
 
 use Cake\Console\Helper;
+use Cake\Network\Exception\InternalErrorException;
 
 class ColorfulHelper extends Helper
 {
