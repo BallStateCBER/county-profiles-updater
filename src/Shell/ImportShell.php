@@ -43,7 +43,7 @@ class ImportShell extends Shell
         if ($message) {
             $message = $this->helper('Colorful')->error($message);
         }
-        return parent::abort($message);
+        parent::abort($message);
     }
 
     private function getOverwrite()
