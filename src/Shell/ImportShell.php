@@ -283,6 +283,7 @@ class ImportShell extends Shell
                 }
             } else {
                 $this->out();
+                $overwriteCount = count($this->toOverwrite);
                 $msg = $overwriteCount.' updated '.__n('statistic', 'statistics', $overwriteCount).' ignored';
                 $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
                 $this->out($msg);
