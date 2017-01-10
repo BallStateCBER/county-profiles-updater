@@ -313,7 +313,7 @@ class ImportShell extends Shell
      * when called for the first time and aborts program if it cannot.
      *
      * @param int $key
-     * @return string|boolean
+     * @return array|string|boolean
      */
     private function availableImports($key = null)
     {
