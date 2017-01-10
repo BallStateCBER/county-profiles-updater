@@ -48,6 +48,12 @@ class Location
                 return 1;
             case 5: // tax district
                 list($dlgfFistrictId, $countyFips) = $locCode;
+                $countiesTables = TableRegistry::get('Counties');
+                $result = $countiesTables->find('all')
+                    ->select(['id'])
+                    ->where(['fips' => $countyFips])
+                    ->first();
+                $countyId = $result ? $result->id : null;
                 $tableName = 'TaxDistricts';
                 $conditions = [
                     'dlgf_districtId' => $dlgfFistrictId,
@@ -71,7 +77,9 @@ class Location
             ->first();
 
         if (empty($result)) {
-            throw new NotFoundException("Location matching ".print_r($fips, true)." not found in $tableName table");
+            $msg = 'Location matching conditions ' . print_r($conditions, true) .
+                ' not found in ' . $tableName . ' table';
+            throw new NotFoundException($msg);
         }
 
         $locId = $result->id;
