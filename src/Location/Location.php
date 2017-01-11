@@ -15,8 +15,8 @@ class Location
      * Returns the ID of a location (city, county, etc.)
      * based on the location type and code (FIPS, district ID, etc.)
      *
-     * @param string $locCode
-     * @param string $locTypeId
+     * @param string $locCode Location code (FIPS, district ID, etc.)
+     * @param string $locTypeId Location type ID (2: county, 3: state, etc.)
      * @return int
      * @throws NotFoundException
      */
@@ -45,6 +45,7 @@ class Location
                 break;
             case 4: // country, assumed to be USA
                 Cache::write($cacheKey, 1);
+
                 return 1;
             case 5: // tax district
                 list($dlgfFistrictId, $countyFips) = $locCode;
@@ -86,6 +87,7 @@ class Location
 
         if ($locId) {
             Cache::write($cacheKey, $locId);
+
             return $locId;
         }
 

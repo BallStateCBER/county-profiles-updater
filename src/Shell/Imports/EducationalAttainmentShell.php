@@ -7,6 +7,11 @@ use CBERDataGrabber\ACSUpdater;
 
 class EducationalAttainmentShell extends ImportShell
 {
+    /**
+     * Run method
+     *
+     * @return void
+     */
     public function run()
     {
         $this->geography = $this->in('Do you want to import county or state data?', ['county', 'state'], 'county');
@@ -19,7 +24,7 @@ class EducationalAttainmentShell extends ImportShell
         } else {
             throw new InternalErrorException('Unrecognized geography type "' . $this->geography . '"');
         }
-        $this->surveyDate = $this->year.'0000';
+        $this->surveyDate = $this->year . '0000';
         $this->sourceId = 62; // 'U.S. Census Bureau'
         $this->categoryIds = [
             'Less than 9th grade' => 5711,
@@ -67,7 +72,7 @@ class EducationalAttainmentShell extends ImportShell
                     $retval[$fips]["Percent: $category"] = round($percent, 2);
                 }
             }
-            
+
             return $retval;
         });
 

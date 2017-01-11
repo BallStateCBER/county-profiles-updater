@@ -74,6 +74,7 @@ class TaxDistrictsTable extends Table
     {
         $rules->add($rules->existsIn(['county_id'], 'Counties'));
         $rules->add($rules->existsIn(['dlgf_district_id'], 'DlgfDistricts'));
+
         return $rules;
     }
 }

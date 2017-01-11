@@ -5,10 +5,7 @@ use App\Location\Location;
 use Cake\Console\Shell;
 use Cake\Core\Configure;
 use Cake\Filesystem\Folder;
-use Cake\Network\Exception\InternalErrorException;
-use Cake\Network\Exception\NotFoundException;
 use Cake\ORM\TableRegistry;
-use Cake\Utility\Inflector;
 
 class ImportShell extends Shell
 {
@@ -28,6 +25,11 @@ class ImportShell extends Shell
     public $stateId = null;
     public $geography = null;
 
+    /**
+     * Modifies the standard output of running 'cake import --help'
+     *
+     * @return \Cake\Console\ConsoleOptionParser
+     */
     public function getOptionParser()
     {
         $parser = parent::getOptionParser();
@@ -36,9 +38,17 @@ class ImportShell extends Shell
             'help' => 'The name of an import to run, such as PopulationAge',
             'required' => false
         ]);
+
         return $parser;
     }
 
+    /**
+     * Aborts the script with a styled error message
+     *
+     * @param null|string $message Message
+     * @param int $exitCode Exit code
+     * @return void
+     */
     public function abort($message = null, $exitCode = self::CODE_ERROR)
     {
         if ($message) {
@@ -47,6 +57,12 @@ class ImportShell extends Shell
         parent::abort($message);
     }
 
+    /**
+     * Gets the value for $this->overwrite and prompts for
+     * input if it has not been set
+     *
+     * @return bool
+     */
     private function getOverwrite()
     {
         if ($this->overwrite == 'y') {
@@ -56,20 +72,36 @@ class ImportShell extends Shell
             return false;
         }
         $this->overwrite = $this->in('Overwrite existing database records?', ['y', 'n'], 'y');
+
         return $this->getOverwrite();
     }
 
+    /**
+     * Returns a string containing the percentage of a task that is done
+     *
+     * @param int $step Current step number
+     * @param int $stepCount Total number of steps
+     * @return string
+     */
     private function getProgress($step, $stepCount)
     {
-        $percentDone = round(($step/$stepCount) * 100);
+        $percentDone = round(($step / $stepCount) * 100);
         $percentDone = str_pad($percentDone, 3, ' ', STR_PAD_LEFT);
-        return $percentDone.'%';
+
+        return $percentDone . '%';
     }
 
+    /**
+     * Aborts the script with information about an error concerning
+     * a Statistic entity
+     *
+     * @param array $errors Errors
+     * @return void
+     */
     private function abortWithEntityError($errors)
     {
         $count = count($errors);
-        $msg = __n('Error', 'Errors', $count).' creating a statistic entity: ';
+        $msg = __n('Error', 'Errors', $count) . ' creating a statistic entity: ';
         $msg = $this->helper('Colorful')->error($msg);
         $this->out($msg);
         $this->out(print_r($errors, true));
@@ -86,12 +118,12 @@ class ImportShell extends Shell
         $this->out('Available imports:');
         $available = $this->availableImports();
         foreach ($available as $k => $import) {
-            $this->out("[$k] ".$this->helper('Colorful')->menuOption($import));
+            $this->out("[$k] " . $this->helper('Colorful')->menuOption($import));
         }
         $this->out('');
         $msg = 'Please select an import to run: ';
         if (count($available) > 1) {
-            $msg .= '[0-'.(count($available) - 1).']';
+            $msg .= '[0-' . (count($available) - 1) . ']';
         } else {
             $msg .= '[0]';
         }
@@ -100,9 +132,16 @@ class ImportShell extends Shell
             return $importNum;
         }
         $this->out($this->helper('Colorful')->error('Invalid selection'), 2);
+
         return $this->menu();
     }
 
+    /**
+     * Main method
+     *
+     * @param null|string $importName Name of specific import to run
+     * @return mixed
+     */
     public function main($importName = null)
     {
         // Process $importName parameter (e.g. "bin\cake import PopulationAge")
@@ -124,9 +163,17 @@ class ImportShell extends Shell
         $importClass = "App\\Shell\\Imports\\{$importName}Shell";
         $importObj = new $importClass();
         $importObj->apiKey = Configure::read('census_api_key');
+
         return $importObj->run();
     }
 
+    /**
+     * Analyzes data returned by the CBER Data Grabber, reports on errors,
+     * reports on actions that will be taken by the import process, and
+     * prompts to user to begin the import
+     *
+     * @return void
+     */
     private function prepareImport()
     {
         if (empty($this->apiCallResults)) {
@@ -139,8 +186,8 @@ class ImportShell extends Shell
             $dataPointCount += count($data);
         }
         $locationCount = count($this->apiCallResults);
-        $msg = number_format($dataPointCount).__n(' data point ', ' data points ', $dataPointCount);
-        $msg .= 'found for '.number_format($locationCount).' locations';
+        $msg = number_format($dataPointCount) . __n(' data point ', ' data points ', $dataPointCount);
+        $msg .= 'found for ' . number_format($locationCount) . ' locations';
         $this->out($msg, 2);
 
         // Break down insert / overwrite / ignore and catch errors
@@ -176,7 +223,8 @@ class ImportShell extends Shell
                     ->toArray();
                 $count = count($results);
                 if ($count > 1) {
-                    $this->abort("Problem: More than one statistics record found matching ".print_r($conditions, true));
+                    $msg = 'Problem: More than one statistics record found matching ' . print_r($conditions, true);
+                    $this->abort($msg);
                 }
 
                 // Prepare record for inserting / overwriting
@@ -218,21 +266,21 @@ class ImportShell extends Shell
         $this->stepCount = 0;
         if ($this->ignoreCount) {
             $ignoreCount = $this->ignoreCount;
-            $msg = number_format($ignoreCount).' '.__n('statistic has', 'statistics have', $ignoreCount);
-            $msg .= ' already been recorded and will be '.$this->helper('Colorful')->importRedundant('ignored');
+            $msg = number_format($ignoreCount) . ' ' . __n('statistic has', 'statistics have', $ignoreCount);
+            $msg .= ' already been recorded and will be ' . $this->helper('Colorful')->importRedundant('ignored');
             $this->out($msg);
         }
         if (! empty($this->toInsert)) {
             $insertCount = count($this->toInsert);
-            $msg = number_format($insertCount).' '.__n('statistic', 'statistics', $insertCount);
-            $msg .= ' will be '.$this->helper('Colorful')->importInsert('added');
+            $msg = number_format($insertCount) . ' ' . __n('statistic', 'statistics', $insertCount);
+            $msg .= ' will be ' . $this->helper('Colorful')->importInsert('added');
             $this->out($msg);
             $this->stepCount += $insertCount;
         }
         if (! empty($this->toOverwrite)) {
             $overwriteCount = count($this->toOverwrite);
-            $msg = number_format($overwriteCount).' existing '.__n('statistic', 'statistics', $overwriteCount);
-            $msg .= ' will be '.$this->helper('Colorful')->importOverwrite('overwritten');
+            $msg = number_format($overwriteCount) . ' existing ' . __n('statistic', 'statistics', $overwriteCount);
+            $msg .= ' will be ' . $this->helper('Colorful')->importOverwrite('overwritten');
             $this->out($msg);
             if ($this->getOverwrite()) {
                 $this->stepCount += $overwriteCount;
@@ -251,6 +299,11 @@ class ImportShell extends Shell
         }
     }
 
+    /**
+     * Prepares an import and conducts inserts and updates where appropriate
+     *
+     * @return bool
+     */
     protected function import()
     {
         $this->prepareImport();
@@ -285,7 +338,7 @@ class ImportShell extends Shell
             } else {
                 $this->out();
                 $overwriteCount = count($this->toOverwrite);
-                $msg = $overwriteCount.' updated '.__n('statistic', 'statistics', $overwriteCount).' ignored';
+                $msg = $overwriteCount . ' updated ' . __n('statistic', 'statistics', $overwriteCount) . ' ignored';
                 $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
                 $this->out($msg);
             }
@@ -298,12 +351,18 @@ class ImportShell extends Shell
         return true;
     }
 
+    /**
+     * Calls $callable and catches any exceptions, outputting an error message
+     *
+     * @param callable $callable A callable function
+     * @return void
+     */
     public function makeApiCall($callable)
     {
         try {
             $this->apiCallResults = $callable();
         } catch (\Exception $e) {
-            $this->abort('Error: '.$e->getMessage());
+            $this->abort('Error: ' . $e->getMessage());
         }
     }
 
@@ -313,13 +372,13 @@ class ImportShell extends Shell
      * invalid. Attempts to populate $this->availableImports
      * when called for the first time and aborts program if it cannot.
      *
-     * @param int $key
-     * @return array|string|boolean
+     * @param int $key Numeric key for specifying an import
+     * @return array|string|bool
      */
     private function availableImports($key = null)
     {
         if (empty($this->availableImports)) {
-            $dir = new Folder(APP.'Shell'.DS.'Imports');
+            $dir = new Folder(APP . 'Shell' . DS . 'Imports');
             $files = $dir->find('.*Shell\.php');
             if (empty($files)) {
                 $this->abort('No imports are available to run');

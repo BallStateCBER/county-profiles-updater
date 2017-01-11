@@ -6,12 +6,17 @@ use CBERDataGrabber\ACSUpdater;
 
 class EthnicMakeupShell extends ImportShell
 {
+    /**
+     * Run method
+     *
+     * @return void
+     */
     public function run()
     {
         $this->year = $this->in('What year do you want to import data for?', null, 2015);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
-        $this->surveyDate = $this->year.'0000';
+        $this->surveyDate = $this->year . '0000';
         $this->sourceId = 61; // 'U.S. Census Bureau'
 
         /*

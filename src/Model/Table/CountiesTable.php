@@ -150,6 +150,7 @@ class CountiesTable extends Table
     {
         $rules->add($rules->existsIn(['state_id'], 'States'));
         $rules->add($rules->existsIn(['county_seat_id'], 'CountySeats'));
+
         return $rules;
     }
 }

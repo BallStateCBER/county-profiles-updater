@@ -6,7 +6,14 @@ use Cake\Network\Exception\InternalErrorException;
 
 class ColorfulHelper extends Helper
 {
-    public function setBg($color) {
+    /**
+     * Returns a string that defines a message's background color
+     *
+     * @param string $color Color
+     * @return string
+     */
+    public function setBg($color)
+    {
         $bgColors = [
             'black' => '40',
             'red' => '41',
@@ -17,10 +24,18 @@ class ColorfulHelper extends Helper
             'cyan' => '46',
             'light_gray' => '47'
         ];
-        return "\033[".$bgColors[$color]."m";
+
+        return "\033[" . $bgColors[$color] . "m";
     }
 
-    public function setFg($color) {
+    /**
+     * Returns a string that defines a message's foreground color
+     *
+     * @param string $color Color
+     * @return string
+     */
+    public function setFg($color)
+    {
         $fgColors = [
             'black' => '0;30',
             'dark_gray' => '1;30',
@@ -39,9 +54,16 @@ class ColorfulHelper extends Helper
             'light_gray' => '0;37',
             'white' => '1;37'
         ];
-        return "\033[".$fgColors[$color]."m";
+
+        return "\033[" . $fgColors[$color] . "m";
     }
 
+    /**
+     * Returns a styled string
+     *
+     * @param array $args Array of [style type, message]
+     * @return string
+     */
     public function output($args)
     {
         list($type, $msg) = $args;
@@ -68,41 +90,84 @@ class ColorfulHelper extends Helper
                 $styles = $this->setFg('light_green');
                 break;
             default:
-                throw new InternalErrorException('Unrecognized message style: '.$type);
+                throw new InternalErrorException('Unrecognized message style: ' . $type);
         }
-        return $styles.$msg."\033[0m";
+
+        return $styles . $msg . "\033[0m";
     }
 
+    /**
+     * Returns a success message
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function success($msg)
     {
         return $this->output(['success', $msg]);
     }
 
+    /**
+     * Returns an error message
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function error($msg)
     {
         return $this->output(['error', $msg]);
     }
 
+    /**
+     * Returns an import message, styled as "data inserted"
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function importInsert($msg)
     {
         return $this->output(['import-insert', $msg]);
     }
 
+    /**
+     * Returns an import message, styled as "data overwritten"
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function importOverwrite($msg)
     {
         return $this->output(['import-overwrite', $msg]);
     }
 
+    /**
+     * Returns an import message, styled as "potential overwrite was blocked"
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function importOverwriteBlocked($msg)
     {
         return $this->output(['import-overwrite-blocked', $msg]);
     }
 
+    /**
+     * Returns an import message, styled as "redundant"
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function importRedundant($msg)
     {
         return $this->output(['import-redundant', $msg]);
     }
 
+    /**
+     * Returns a message, styled as a menu option
+     *
+     * @param string $msg Message
+     * @return string
+     */
     public function menuOption($msg)
     {
         return $this->output(['menu-option', $msg]);
