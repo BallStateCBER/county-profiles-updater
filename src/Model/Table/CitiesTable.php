@@ -68,6 +68,7 @@ class CitiesTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['county_id'], 'Counties'));
+
         return $rules;
     }
 }

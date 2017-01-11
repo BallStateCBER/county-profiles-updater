@@ -84,6 +84,7 @@ class StatisticsTable extends Table
         $rules->add($rules->existsIn(['loc_type_id'], 'LocationTypes'));
         $rules->add($rules->existsIn(['category_id'], 'DataCategories'));
         $rules->add($rules->existsIn(['source_id'], 'Sources'));
+
         return $rules;
     }
 }

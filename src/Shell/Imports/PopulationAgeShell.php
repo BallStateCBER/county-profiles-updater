@@ -7,12 +7,17 @@ use CBERDataGrabber\ACSUpdater;
 
 class PopulationAgeShell extends ImportShell
 {
+    /**
+     * Run method
+     *
+     * @return void
+     */
     public function run()
     {
         $this->year = $this->in('What year do you want to import data for?', null, 2014);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
-        $this->surveyDate = $this->year.'0000';
+        $this->surveyDate = $this->year . '0000';
         $this->sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
         $this->categoryIds = [
             'Total Population' => 1,
@@ -34,7 +39,7 @@ class PopulationAgeShell extends ImportShell
         $this->out('Retrieving data from Census API...');
         ACSUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
-            return ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$POPULATION_AGE, false);
+            return ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$POPULATION_AGE);
         });
 
         $this->import();

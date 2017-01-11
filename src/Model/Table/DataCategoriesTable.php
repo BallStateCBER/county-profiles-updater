@@ -103,6 +103,7 @@ class DataCategoriesTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['parent_id'], 'ParentDataCategories'));
+
         return $rules;
     }
 }

@@ -7,12 +7,17 @@ use CBERDataGrabber\ACSUpdater;
 
 class HouseholdIncomeShell extends ImportShell
 {
+    /**
+     * Run method
+     *
+     * @return void
+     */
     public function run()
     {
         $this->year = $this->in('What year do you want to import data for?', null, 2011);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
-        $this->surveyDate = $this->year.'0000';
+        $this->surveyDate = $this->year . '0000';
         $this->sourceId = 60; // 'American Community Survey (ACS) (https://www.census.gov/programs-surveys/acs/)'
         $this->categoryIds = [
             'Number of Households' => 11,
@@ -44,7 +49,7 @@ class HouseholdIncomeShell extends ImportShell
             // Calculate "percentage of households" values
             $categoryNames = array_keys($this->categoryIds);
             $householdCountCategory = array_shift($categoryNames);
-            $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$HOUSEHOLD_INCOME, false);
+            $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$HOUSEHOLD_INCOME);
             foreach ($results as $fips => &$data) {
                 $householdCount = $data[$householdCountCategory];
                 foreach ($data as $category => $count) {
@@ -54,6 +59,7 @@ class HouseholdIncomeShell extends ImportShell
                     }
                 }
             }
+
             return $results;
         });
 
