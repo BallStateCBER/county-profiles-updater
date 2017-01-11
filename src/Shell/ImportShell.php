@@ -26,6 +26,7 @@ class ImportShell extends Shell
     public $toOverwrite = [];
     public $year = null;
     public $stateId = null;
+    public $geography = null;
 
     public function getOptionParser()
     {
