@@ -10,7 +10,8 @@
         "mobiledetect/mobiledetectlib": "2.*",
         "cakephp/migrations": "~1.0",
         "cakephp/plugin-installer": "*",
-        "ballstatecber/cber-data-grabber": "dev-master"
+        "ballstatecber/cber-data-grabber": "dev-master",
+        "cakephp/cakephp-codesniffer": "*"
     },
     "require-dev": {
         "psy/psysh": "@stable",
