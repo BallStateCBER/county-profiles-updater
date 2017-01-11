@@ -24,6 +24,7 @@ class ImportShell extends Shell
     public $year = null;
     public $stateId = null;
     public $geography = null;
+    public $statisticsTable = null;
 
     /**
      * Modifies the standard output of running 'cake import --help'
@@ -192,7 +193,7 @@ class ImportShell extends Shell
 
         // Break down insert / overwrite / ignore and catch errors
         $Location = new Location();
-        $statisticsTable = TableRegistry::get('Statistics');
+        $this->statisticsTable = TableRegistry::get('Statistics');
         $this->out('Preparing import...', 0);
         $step = 0;
         foreach ($this->apiCallResults as $fips => $data) {
@@ -207,34 +208,21 @@ class ImportShell extends Shell
                 $this->_io->overwrite($msg, 0);
 
                 // Look for matching records
-                if (! isset($this->categoryIds[$category])) {
-                    $this->abort("Unrecognized category: $category");
-                }
-                $categoryId = $this->categoryIds[$category];
-                $conditions = [
+                $matchingRecords = $this->getMatchingRecords($locationId, $category);
+
+                // Prepare record for inserting / overwriting
+                $newRecord = [
                     'loc_type_id' => $this->locationTypeId,
                     'loc_id' => $locationId,
                     'survey_date' => $this->surveyDate,
-                    'category_id' => $categoryId
+                    'category_id' => $this->categoryIds[$category],
+                    'value' => $value,
+                    'source_id' => $this->sourceId
                 ];
-                $results = $statisticsTable->find('all')
-                    ->select(['id', 'value'])
-                    ->where($conditions)
-                    ->toArray();
-                $count = count($results);
-                if ($count > 1) {
-                    $msg = 'Problem: More than one statistics record found matching ' . print_r($conditions, true);
-                    $this->abort($msg);
-                }
-
-                // Prepare record for inserting / overwriting
-                $newRecord = $conditions;
-                $newRecord['value'] = $value;
-                $newRecord['source_id'] = $this->sourceId;
 
                 // Mark for insertion
-                if ($count == 0) {
-                    $statEntity = $statisticsTable->newEntity($newRecord);
+                if (empty($matchingRecords)) {
+                    $statEntity = $this->statisticsTable->newEntity($newRecord);
                     $errors = $statEntity->errors();
                     if (! empty($errors)) {
                         $this->abortWithEntityError($errors);
@@ -244,16 +232,16 @@ class ImportShell extends Shell
                 }
 
                 // Increment ignore count
-                $recordedValue = $results[0]['value'];
+                $recordedValue = $matchingRecords[0]['value'];
                 if ($recordedValue == $value) {
                     $this->ignoreCount++;
                     continue;
                 }
 
                 // Mark for overwriting
-                $recordId = $results[0]['id'];
-                $statEntity = $statisticsTable->get($recordId);
-                $statEntity = $statisticsTable->patchEntity($statEntity, $newRecord);
+                $recordId = $matchingRecords[0]['id'];
+                $statEntity = $this->statisticsTable->get($recordId);
+                $statEntity = $this->statisticsTable->patchEntity($statEntity, $newRecord);
                 $errors = $statEntity->errors();
                 if (! empty($errors)) {
                     $this->abortWithEntityError($errors);
@@ -264,28 +252,9 @@ class ImportShell extends Shell
         $this->out();
 
         $this->stepCount = 0;
-        if ($this->ignoreCount) {
-            $ignoreCount = $this->ignoreCount;
-            $msg = number_format($ignoreCount) . ' ' . __n('statistic has', 'statistics have', $ignoreCount);
-            $msg .= ' already been recorded and will be ' . $this->helper('Colorful')->importRedundant('ignored');
-            $this->out($msg);
-        }
-        if (! empty($this->toInsert)) {
-            $insertCount = count($this->toInsert);
-            $msg = number_format($insertCount) . ' ' . __n('statistic', 'statistics', $insertCount);
-            $msg .= ' will be ' . $this->helper('Colorful')->importInsert('added');
-            $this->out($msg);
-            $this->stepCount += $insertCount;
-        }
-        if (! empty($this->toOverwrite)) {
-            $overwriteCount = count($this->toOverwrite);
-            $msg = number_format($overwriteCount) . ' existing ' . __n('statistic', 'statistics', $overwriteCount);
-            $msg .= ' will be ' . $this->helper('Colorful')->importOverwrite('overwritten');
-            $this->out($msg);
-            if ($this->getOverwrite()) {
-                $this->stepCount += $overwriteCount;
-            }
-        }
+        $this->reportIgnored();
+        $this->reportToInsert();
+        $this->reportToOverwrite();
         $this->out();
 
         if ($this->stepCount == 0) {
@@ -296,6 +265,91 @@ class ImportShell extends Shell
         $begin = $this->in('Begin import?', ['y', 'n'], 'y');
         if ($begin == 'n') {
             $this->_stop();
+        }
+    }
+
+    /**
+     * Returns an array of records that match the current data location, date, and category
+     *
+     * @param int $locationId Location ID
+     * @param string $category Category name
+     * @return array
+     */
+    private function getMatchingRecords($locationId, $category)
+    {
+        if (! isset($this->categoryIds[$category])) {
+            $this->abort("Unrecognized category: $category");
+        }
+        $conditions = [
+            'loc_type_id' => $this->locationTypeId,
+            'loc_id' => $locationId,
+            'survey_date' => $this->surveyDate,
+            'category_id' => $this->categoryIds[$category]
+        ];
+        $results = $this->statisticsTable->find('all')
+            ->select(['id', 'value'])
+            ->where($conditions)
+            ->toArray();
+        if (count($results) > 1) {
+            $msg = 'Problem: More than one statistics record found matching ' . print_r($conditions, true);
+            $this->abort($msg);
+        }
+
+        return $results;
+    }
+
+    /**
+     * Outputs a message about data that will be ignored
+     *
+     * @return void
+     */
+    private function reportIgnored()
+    {
+        if (! $this->ignoreCount) {
+            return;
+        }
+
+        $ignoreCount = $this->ignoreCount;
+        $msg = number_format($ignoreCount) . ' ' . __n('statistic has', 'statistics have', $ignoreCount);
+        $msg .= ' already been recorded and will be ' . $this->helper('Colorful')->importRedundant('ignored');
+        $this->out($msg);
+    }
+
+    /**
+     * Outputs a message about data that will be inserted
+     *
+     * @return void
+     */
+    private function reportToInsert()
+    {
+        if (empty($this->toInsert)) {
+            return;
+        }
+
+        $insertCount = count($this->toInsert);
+        $msg = number_format($insertCount) . ' ' . __n('statistic', 'statistics', $insertCount);
+        $msg .= ' will be ' . $this->helper('Colorful')->importInsert('added');
+        $this->out($msg);
+        $this->stepCount += $insertCount;
+    }
+
+    /**
+     * Outputs a message about data that will be overwritten
+     *
+     * @return void
+     */
+    private function reportToOverwrite()
+    {
+        if (empty($this->toOverwrite)) {
+            return;
+        }
+
+        $overwriteCount = count($this->toOverwrite);
+        $msg = number_format($overwriteCount) . ' existing ' . __n('statistic', 'statistics', $overwriteCount);
+        $msg .= ' will be ' . $this->helper('Colorful')->importOverwrite('overwritten');
+        $this->out($msg);
+        if ($this->getOverwrite()) {
+            $this->stepCount += $overwriteCount;
         }
     }
 
