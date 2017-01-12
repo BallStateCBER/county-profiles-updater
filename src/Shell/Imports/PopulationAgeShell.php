@@ -14,7 +14,7 @@ class PopulationAgeShell extends ImportShell
      */
     public function run()
     {
-        $this->year = $this->in('What year do you want to import data for?', null, 2014);
+        $this->year = $this->in('What year do you want to import data for?', null, 2015);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
         $this->surveyDate = $this->year . '0000';
