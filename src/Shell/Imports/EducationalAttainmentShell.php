@@ -15,7 +15,7 @@ class EducationalAttainmentShell extends ImportShell
     public function run()
     {
         $this->geography = $this->getGeography(['county', 'state']);
-        $this->year = $this->in('What year do you want to import data for?', null, 2015);
+        $this->year = $this->in("\nWhat year do you want to import data for?", null, 2015);
         $this->stateId = '18'; // Indiana
         if ($this->geography == 'county') {
             $this->locationTypeId = 2; // County
@@ -43,7 +43,7 @@ class EducationalAttainmentShell extends ImportShell
             'Percent: Graduate or professional degree' => 5726
         ];
 
-        $this->out('Retrieving data from Census API...');
+        $this->out("\nRetrieving data from Census API...");
         AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             if ($this->geography == 'county') {

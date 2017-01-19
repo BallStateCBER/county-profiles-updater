@@ -14,7 +14,7 @@ class HouseholdIncomeShell extends ImportShell
      */
     public function run()
     {
-        $this->year = $this->in('What year do you want to import data for?', null, 2015);
+        $this->year = $this->in("\nWhat year do you want to import data for?", null, 2015);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
         $this->surveyDate = $this->year . '0000';
@@ -43,7 +43,7 @@ class HouseholdIncomeShell extends ImportShell
             'Percent: $200K or more' => 232
         ];
 
-        $this->out('Retrieving data from Census API...');
+        $this->out("\nRetrieving data from Census API...");
         AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             // Calculate "percentage of households" values

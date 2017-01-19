@@ -14,7 +14,7 @@ class PopulationAgeShell extends ImportShell
      */
     public function run()
     {
-        $this->year = $this->in('What year do you want to import data for?', null, 2015);
+        $this->year = $this->in("\nWhat year do you want to import data for?", null, 2015);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
         $this->surveyDate = $this->year . '0000';
@@ -36,7 +36,7 @@ class PopulationAgeShell extends ImportShell
             '85 and over' => 284
         ];
 
-        $this->out('Retrieving data from Census API...');
+        $this->out("\nRetrieving data from Census API...");
         AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             return AcsUpdater::getCountyData($this->year, $this->stateId, AcsUpdater::$POPULATION_AGE);

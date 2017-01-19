@@ -13,7 +13,7 @@ class EthnicMakeupShell extends ImportShell
      */
     public function run()
     {
-        $this->year = $this->in('What year do you want to import data for?', null, 2015);
+        $this->year = $this->in("\nWhat year do you want to import data for?", null, 2015);
         $this->stateId = '18'; // Indiana
         $this->locationTypeId = 2; // County
         $this->surveyDate = $this->year . '0000';
@@ -40,7 +40,7 @@ class EthnicMakeupShell extends ImportShell
             'Two or more' => 312
         ];
 
-        $this->out('Retrieving data from Census API...');
+        $this->out("\nRetrieving data from Census API...");
         AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             $results = AcsUpdater::getCountyData($this->year, $this->stateId, AcsUpdater::$ETHNIC_MAKEUP);
