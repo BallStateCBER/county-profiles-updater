@@ -450,4 +450,31 @@ class ImportShell extends Shell
 
         return $this->availableImports;
     }
+
+    /**
+     * Returns the name of the geographic scope (county, state, etc.) for this import,
+     * prompting the user for input if necessary
+     *
+     * @param string[] $options
+     * @return string
+     */
+    protected function getGeography($options)
+    {
+        if ($this->geography) {
+            return $this->geography;
+        }
+
+        if (count($options) == 1) {
+            return $options[0];
+        }
+
+        $this->out("\nAvailable geographic scopes:");
+        foreach ($options as $k => $option) {
+            $this->out("[$k] " . $this->helper('Colorful')->menuOption($option));
+        }
+        $msg = "\nPlease select a geographic scope: ";
+        $optionKey = $this->in($msg, array_keys($options), 0);
+
+        return $options[$optionKey];
+    }
 }

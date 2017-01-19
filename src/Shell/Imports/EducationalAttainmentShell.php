@@ -14,7 +14,7 @@ class EducationalAttainmentShell extends ImportShell
      */
     public function run()
     {
-        $this->geography = $this->in('Do you want to import county or state data?', ['county', 'state'], 'county');
+        $this->geography = $this->getGeography(['county', 'state']);
         $this->year = $this->in('What year do you want to import data for?', null, 2015);
         $this->stateId = '18'; // Indiana
         if ($this->geography == 'county') {
