@@ -3,7 +3,7 @@ namespace App\Shell\Imports;
 
 use App\Shell\ImportShell;
 use Cake\Network\Exception\InternalErrorException;
-use CBERDataGrabber\ACSUpdater;
+use CBERDataGrabber\Updater\AcsUpdater;
 
 class EducationalAttainmentShell extends ImportShell
 {
@@ -44,19 +44,19 @@ class EducationalAttainmentShell extends ImportShell
         ];
 
         $this->out('Retrieving data from Census API...');
-        ACSUpdater::setAPIKey($this->apiKey);
+        AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             if ($this->geography == 'county') {
-                $results = ACSUpdater::getCountyData(
+                $results = AcsUpdater::getCountyData(
                     $this->year,
                     $this->stateId,
-                    ACSUpdater::$EDUCATIONAL_ATTAINMENT
+                    AcsUpdater::$EDUCATIONAL_ATTAINMENT
                 );
             } else {
-                $results = ACSUpdater::getStateData(
+                $results = AcsUpdater::getStateData(
                     $this->year,
                     $this->stateId,
-                    ACSUpdater::$EDUCATIONAL_ATTAINMENT
+                    AcsUpdater::$EDUCATIONAL_ATTAINMENT
                 );
             }
 

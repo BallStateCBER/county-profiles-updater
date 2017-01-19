@@ -3,7 +3,7 @@ namespace App\Shell\Imports;
 
 use App\Location\Location;
 use App\Shell\ImportShell;
-use CBERDataGrabber\ACSUpdater;
+use CBERDataGrabber\Updater\AcsUpdater;
 
 class HouseholdIncomeShell extends ImportShell
 {
@@ -44,12 +44,12 @@ class HouseholdIncomeShell extends ImportShell
         ];
 
         $this->out('Retrieving data from Census API...');
-        ACSUpdater::setAPIKey($this->apiKey);
+        AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             // Calculate "percentage of households" values
             $categoryNames = array_keys($this->categoryIds);
             $householdCountCategory = array_shift($categoryNames);
-            $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$HOUSEHOLD_INCOME);
+            $results = AcsUpdater::getCountyData($this->year, $this->stateId, AcsUpdater::$HOUSEHOLD_INCOME);
             foreach ($results as $fips => &$data) {
                 $householdCount = $data[$householdCountCategory];
                 foreach ($data as $category => $count) {

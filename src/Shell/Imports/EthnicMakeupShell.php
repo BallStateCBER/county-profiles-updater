@@ -2,7 +2,7 @@
 namespace App\Shell\Imports;
 
 use App\Shell\ImportShell;
-use CBERDataGrabber\ACSUpdater;
+use CBERDataGrabber\Updater\AcsUpdater;
 
 class EthnicMakeupShell extends ImportShell
 {
@@ -41,9 +41,9 @@ class EthnicMakeupShell extends ImportShell
         ];
 
         $this->out('Retrieving data from Census API...');
-        ACSUpdater::setAPIKey($this->apiKey);
+        AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
-            $results = ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$ETHNIC_MAKEUP);
+            $results = AcsUpdater::getCountyData($this->year, $this->stateId, AcsUpdater::$ETHNIC_MAKEUP);
             $retval = [];
             foreach ($results as $fips => &$data) {
                 $totalPopulation = $data['Total'];

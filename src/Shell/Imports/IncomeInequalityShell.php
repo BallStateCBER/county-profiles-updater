@@ -3,7 +3,7 @@ namespace App\Shell\Imports;
 
 use App\Shell\ImportShell;
 use Cake\Network\Exception\InternalErrorException;
-use CBERDataGrabber\ACSUpdater;
+use CBERDataGrabber\Updater\AcsUpdater;
 
 class IncomeInequalityShell extends ImportShell
 {
@@ -31,20 +31,20 @@ class IncomeInequalityShell extends ImportShell
         ];
 
         $this->out('Retrieving data from Census API...');
-        ACSUpdater::setAPIKey($this->apiKey);
+        AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
             if ($this->geography == 'county') {
-                return ACSUpdater::getCountyData(
+                return AcsUpdater::getCountyData(
                     $this->year,
                     $this->stateId,
-                    ACSUpdater::$INEQUALITY_INDEX
+                    AcsUpdater::$INEQUALITY_INDEX
                 );
             }
 
-            return ACSUpdater::getStateData(
+            return AcsUpdater::getStateData(
                 $this->year,
                 $this->stateId,
-                ACSUpdater::$INEQUALITY_INDEX
+                AcsUpdater::$INEQUALITY_INDEX
             );
         });
 

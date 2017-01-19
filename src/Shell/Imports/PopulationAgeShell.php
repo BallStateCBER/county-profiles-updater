@@ -3,7 +3,7 @@ namespace App\Shell\Imports;
 
 use App\Location\Location;
 use App\Shell\ImportShell;
-use CBERDataGrabber\ACSUpdater;
+use CBERDataGrabber\Updater\AcsUpdater;
 
 class PopulationAgeShell extends ImportShell
 {
@@ -37,9 +37,9 @@ class PopulationAgeShell extends ImportShell
         ];
 
         $this->out('Retrieving data from Census API...');
-        ACSUpdater::setAPIKey($this->apiKey);
+        AcsUpdater::setAPIKey($this->apiKey);
         $this->makeApiCall(function () {
-            return ACSUpdater::getCountyData($this->year, $this->stateId, ACSUpdater::$POPULATION_AGE);
+            return AcsUpdater::getCountyData($this->year, $this->stateId, AcsUpdater::$POPULATION_AGE);
         });
 
         $this->import();
