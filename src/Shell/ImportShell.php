@@ -248,6 +248,9 @@ class ImportShell extends Shell
                 }
                 $this->toOverwrite[] = $statEntity;
             }
+
+            $msg = "Preparing import: 100%";
+            $this->_io->overwrite($msg, 0);
         }
         $this->out();
 
@@ -389,18 +392,22 @@ class ImportShell extends Shell
                     $this->_io->overwrite($msg, 0);
                     $statisticsTable->save($statEntity);
                 }
-            } else {
-                $this->out();
-                $overwriteCount = count($this->toOverwrite);
-                $msg = $overwriteCount . ' updated ' . __n('statistic', 'statistics', $overwriteCount) . ' ignored';
-                $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
-                $this->out($msg);
             }
         }
+
+        $msg = "Preparing import: 100%";
+        $this->_io->overwrite($msg, 0);
 
         $this->out();
         $msg = $this->helper('Colorful')->success('Import complete');
         $this->out($msg);
+
+        if (! empty($this->toOverwrite) && ! $this->getOverwrite()) {
+            $overwriteCount = count($this->toOverwrite);
+            $msg = $overwriteCount . ' updated ' . __n('statistic', 'statistics', $overwriteCount) . ' ignored';
+            $msg = $this->helper('Colorful')->importOverwriteBlocked($msg);
+            $this->out($msg);
+        }
 
         return true;
     }
