@@ -10,21 +10,21 @@ use Cake\ORM\TableRegistry;
 class ImportShell extends Shell
 {
     public $apiCallResults = [];
-    public $apiKey = null;
+    public $apiKey;
     public $availableImports = [];
     public $categoryIds = [];
     public $ignoreCount = 0;
-    public $locationTypeId = null;
-    public $overwrite = null;
-    public $sourceId = null;
+    public $locationTypeId;
+    public $overwrite;
+    public $sourceId;
     public $stepCount = 0;
-    public $surveyDate = null;
+    public $surveyDate;
     public $toInsert = [];
     public $toOverwrite = [];
-    public $year = null;
-    public $stateId = null;
-    public $geography = null;
-    public $statisticsTable = null;
+    public $year;
+    public $stateId;
+    public $geography;
+    public $statisticsTable;
 
     /**
      * Modifies the standard output of running 'cake import --help'
