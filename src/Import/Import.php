@@ -11,6 +11,7 @@ class Import
     public $mapName;
     public $sourceId;
     public $stateId;
+    public $type;
 
     const DEFAULT_YEAR = 2015;
     const DEFAULT_STATE = 18; // Indiana
