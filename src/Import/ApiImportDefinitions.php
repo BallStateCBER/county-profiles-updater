@@ -34,7 +34,7 @@ class ApiImportDefinitions
                 'Percent: Graduate or professional degree' => 5726
             ],
             'dataGrabber' => 'AcsUpdater',
-            'mapName' => AcsUpdater::$EDUCATIONAL_ATTAINMENT,
+            'mapName' => AcsUpdater::EDUCATIONAL_ATTAINMENT,
             'callback' => function ($results) {
                 $retval = [];
                 foreach ($results as $fips => &$data) {
@@ -73,7 +73,7 @@ class ApiImportDefinitions
                 'Two or more' => 312
             ],
             'dataGrabber' => 'AcsUpdater',
-            'mapName' => AcsUpdater::$ETHNIC_MAKEUP,
+            'mapName' => AcsUpdater::ETHNIC_MAKEUP,
             'callback' => function ($results) {
                 $retval = [];
                 foreach ($results as $fips => &$data) {
@@ -119,7 +119,7 @@ class ApiImportDefinitions
                 'Percent: $200K or more' => 232
             ],
             'dataGrabber' => 'AcsUpdater',
-            'mapName' => AcsUpdater::$HOUSEHOLD_INCOME,
+            'mapName' => AcsUpdater::HOUSEHOLD_INCOME,
             'callback' => function ($results) {
                 foreach ($results as $fips => &$data) {
                     $householdCount = $data['Number of Households'];
@@ -142,7 +142,7 @@ class ApiImportDefinitions
                 'GINI Index' => 5668
             ],
             'dataGrabber' => 'AcsUpdater',
-            'mapName' => AcsUpdater::$INEQUALITY_INDEX
+            'mapName' => AcsUpdater::INEQUALITY_INDEX
         ];
 
         $imports['Population by age'] = [
@@ -165,7 +165,7 @@ class ApiImportDefinitions
                 '85 and over' => 284
             ],
             'dataGrabber' => 'AcsUpdater',
-            'mapName' => AcsUpdater::$POPULATION_AGE
+            'mapName' => AcsUpdater::POPULATION_AGE
         ];
 
         foreach ($imports as $key => $params) {
