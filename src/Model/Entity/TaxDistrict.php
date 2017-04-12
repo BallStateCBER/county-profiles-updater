@@ -12,7 +12,6 @@ use Cake\ORM\Entity;
  * @property int $county_id
  * @property \App\Model\Entity\County $county
  * @property int $dlgf_district_id
- * @property \App\Model\Entity\DlgfDistrict $dlgf_district
  */
 class TaxDistrict extends Entity
 {

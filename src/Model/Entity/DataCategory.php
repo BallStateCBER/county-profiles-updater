@@ -12,12 +12,10 @@ use Cake\ORM\Entity;
  * @property string $display_type
  * @property int $display_precision
  * @property int $parent_id
- * @property \App\Model\Entity\ParentDataCategory $parent_data_category
  * @property int $lft
  * @property int $rght
  * @property bool $is_group
  * @property string $notes
- * @property \App\Model\Entity\ChildDataCategory[] $child_data_categories
  */
 class DataCategory extends Entity
 {
