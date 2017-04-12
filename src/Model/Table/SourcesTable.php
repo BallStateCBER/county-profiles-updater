@@ -1,9 +1,6 @@
 <?php
 namespace App\Model\Table;
 
-use App\Model\Entity\Source;
-use Cake\ORM\Query;
-use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
