@@ -26,9 +26,9 @@ class TaxDistrictsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('tax_districts');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('tax_districts');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->belongsTo('Counties', [
             'foreignKey' => 'county_id',

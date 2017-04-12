@@ -24,9 +24,9 @@ class LocationTypesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('location_types');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('location_types');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
     }
 
     /**

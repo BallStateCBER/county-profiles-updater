@@ -25,9 +25,9 @@ class SchoolCorpsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('school_corps');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('school_corps');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->belongsTo('Counties', [
             'foreignKey' => 'county_id',

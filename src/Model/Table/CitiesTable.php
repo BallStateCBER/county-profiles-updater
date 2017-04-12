@@ -25,9 +25,9 @@ class CitiesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('cities');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('cities');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->belongsTo('Counties', [
             'foreignKey' => 'county_id',

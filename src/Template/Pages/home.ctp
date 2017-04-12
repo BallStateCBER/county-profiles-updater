@@ -97,7 +97,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
                     <p class="problem">Your logs directory is NOT writable.</p>
                 <?php endif; ?>
 
-                <?php $settings = Cache::config('_cake_core_'); ?>
+                <?php $settings = Cache::setConfig('_cake_core_'); ?>
                 <?php if (!empty($settings)): ?>
                     <p class="success">The <em><?= $settings['className'] ?>Engine</em> is being used for core caching. To change the config edit config/app.php</p>
                 <?php else: ?>

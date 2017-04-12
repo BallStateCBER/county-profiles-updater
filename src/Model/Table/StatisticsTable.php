@@ -27,9 +27,9 @@ class StatisticsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('statistics');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('statistics');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 

@@ -26,9 +26,9 @@ class DataCategoriesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('data_categories');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('data_categories');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Tree');
 

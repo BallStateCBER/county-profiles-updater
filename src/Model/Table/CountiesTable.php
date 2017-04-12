@@ -39,9 +39,9 @@ class CountiesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('counties');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('counties');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 

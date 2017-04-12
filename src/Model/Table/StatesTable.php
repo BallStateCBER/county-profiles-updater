@@ -25,9 +25,9 @@ class StatesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('states');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('states');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->hasMany('Counties', [
             'foreignKey' => 'state_id'

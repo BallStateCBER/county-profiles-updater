@@ -25,9 +25,9 @@ class SourcesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('sources');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('sources');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->hasMany('Statistics', [
             'foreignKey' => 'source_id'
