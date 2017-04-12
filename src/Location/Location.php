@@ -2,6 +2,7 @@
 namespace App\Location;
 
 use Cake\Cache\Cache;
+use Cake\Network\Exception\InternalErrorException;
 use Cake\Network\Exception\NotFoundException;
 use Cake\ORM\TableRegistry;
 
@@ -92,5 +93,33 @@ class Location
         }
 
         throw new NotFoundException("Location with type $locTypeId and code $locCode not found");
+    }
+
+    /**
+     * Returns the location type ID for the given location type
+     *
+     * @param string $locationTypeName Location type name
+     * @return int
+     * @throws InternalErrorException
+     */
+    public function getLocationTypeId($locationTypeName)
+    {
+        $locationTypes = [
+            1 => 'city',
+            2 => 'county',
+            3 => 'state',
+            4 => 'country',
+            5 => 'tax district',
+            6 => 'school corporation',
+            7 => 'township'
+        ];
+
+        $id = array_search($locationTypeName, $locationTypes);
+
+        if ($id) {
+            return $id;
+        }
+
+        throw new InternalErrorException('Unrecognized location type: ' . $locationTypeName);
     }
 }
