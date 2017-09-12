@@ -1,6 +1,10 @@
 County Profiles Updater
 =======================
 
+[![Code Climate](https://codeclimate.com/repos/58c87af5f243b0028700005c/badges/5147076e53f5eeaa0a59/gpa.svg)](https://codeclimate.com/repos/58c87af5f243b0028700005c/feed)
+[![Test Coverage](https://codeclimate.com/repos/58c87af5f243b0028700005c/badges/5147076e53f5eeaa0a59/coverage.svg)](https://codeclimate.com/repos/58c87af5f243b0028700005c/coverage)
+[![Issue Count](https://codeclimate.com/repos/58c87af5f243b0028700005c/badges/5147076e53f5eeaa0a59/issue_count.svg)](https://codeclimate.com/repos/58c87af5f243b0028700005c/feed)
+
 Uses the [CBER Data Grabber](https://github.com/BallStateCBER/cber-data-grabber) in a shell script
 to pull US federal data from various APIs and update the [County Profiles](http://profiles.cberdata.org)
 website, produced by [Ball State University](http://bsu.edu)'s
