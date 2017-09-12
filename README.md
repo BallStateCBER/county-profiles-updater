@@ -1,6 +1,7 @@
 County Profiles Updater
 =======================
 
+[![Build Status](https://travis-ci.org/BallStateCBER/county-profiles-updater.svg?branch=master)](https://travis-ci.org/BallStateCBER/county-profiles-updater)
 [![Code Climate](https://codeclimate.com/repos/58c87af5f243b0028700005c/badges/5147076e53f5eeaa0a59/gpa.svg)](https://codeclimate.com/repos/58c87af5f243b0028700005c/feed)
 [![Test Coverage](https://codeclimate.com/repos/58c87af5f243b0028700005c/badges/5147076e53f5eeaa0a59/coverage.svg)](https://codeclimate.com/repos/58c87af5f243b0028700005c/coverage)
 [![Issue Count](https://codeclimate.com/repos/58c87af5f243b0028700005c/badges/5147076e53f5eeaa0a59/issue_count.svg)](https://codeclimate.com/repos/58c87af5f243b0028700005c/feed)
